@@ -24,7 +24,7 @@ docker compose down
 http://localhost:3000
 ```
 
-## Documentación
+## Documentación Swagger
 ```bash
 http://localhost:3000/docs
 ```
