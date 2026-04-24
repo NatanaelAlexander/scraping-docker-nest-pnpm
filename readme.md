@@ -13,13 +13,16 @@ Proyecto de prueba para hacer scraping usando:
 
 ```bash
 docker compose up --build
-Detener el proyecto
+```
+## Detener el proyecto
+```bash
 docker compose down
 ```
 
 ## Acceso
-
+```bash
 http://localhost:3000
+```
 
 ## Descripción
 
