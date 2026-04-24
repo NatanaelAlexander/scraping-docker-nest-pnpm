@@ -24,6 +24,11 @@ docker compose down
 http://localhost:3000
 ```
 
+## Documentación
+```bash
+http://localhost:3000/docs
+```
+
 ## Descripción
 
 Este proyecto se usa únicamente para practicar scraping dentro de un backend con NestJS usando Docker.

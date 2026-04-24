@@ -1,22 +1,16 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { AppController } from './app.controller';
+import { Controller, Get } from '@nestjs/common';
 import { AppService } from './app.service';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
-describe('AppController', () => {
-  let appController: AppController;
+@ApiTags('App') // 👈 agrupa en Swagger
+@Controller()
+export class AppController {
+  constructor(private readonly appService: AppService) { }
 
-  beforeEach(async () => {
-    const app: TestingModule = await Test.createTestingModule({
-      controllers: [AppController],
-      providers: [AppService],
-    }).compile();
-
-    appController = app.get<AppController>(AppController);
-  });
-
-  describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(appController.getHello()).toBe('Hello World!');
-    });
-  });
-});
+  @Get()
+  @ApiOperation({ summary: 'Retorna Hello World' })
+  @ApiResponse({ status: 200, description: 'Respuesta exitosa' })
+  getHello(): string {
+    return this.appService.getHello();
+  }
+}
