@@ -9,3 +9,7 @@ services:
     command: pnpm run start:dev
     environment:
       - CHOKIDAR_USEPOLLING=true
+      # Variables de entorno para el scraper SII
+      - RUT_TRIBUTARIO=${RUT_TRIBUTARIO}
+      - PASS_TRIBUTARIO=${PASS_TRIBUTARIO}
+      - TOKEN_BROWSLESS=${TOKEN_BROWSLESS}
