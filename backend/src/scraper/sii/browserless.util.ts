@@ -33,14 +33,14 @@ export class BrowserlessUtil {
             const result = await response.json();
 
             if (result.errors) {
-                console.error('❌ Errores de BrowserQL:', result.errors);
+                console.error('Errores de BrowserQL:', result.errors);
                 throw new Error(`BrowserQL errors: ${JSON.stringify(result.errors)}`);
             }
 
             return result.data;
 
         } catch (error: any) {
-            console.error('❌ Error ejecutando query:', error.message);
+            console.error('Error ejecutando query:', error.message);
             throw error;
         }
     }
@@ -216,6 +216,10 @@ export class BrowserlessUtil {
                     time
                 }
                 
+                profileHtml: html(selector: "#profile") {
+                    html
+                }
+                
                 boxRightHtml: html(selector: "#box_right") {
                     html
                 }
@@ -238,13 +242,14 @@ export class BrowserlessUtil {
         try {
             accordionResult = JSON.parse(data.expandAccordions.value);
         } catch (e) {
-            console.warn('⚠️ No se pudo parsear el resultado de expandAccordions');
+            console.warn('No se pudo parsear el resultado de expandAccordions');
         }
 
         return {
             clickDatosPersonalesTime: data.clickDatosPersonales.time,
             accordionsExpanded: accordionResult.expanded,
             totalAccordions: accordionResult.totalAccordions,
+            profileHtml: data.profileHtml.html,
             boxRightHtml: data.boxRightHtml.html,
             screenshot: data.screenshot?.base64
         };
