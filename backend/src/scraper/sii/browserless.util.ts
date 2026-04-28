@@ -14,6 +14,9 @@ export class BrowserlessUtil {
 
     async executeQuery(query: string, variables: Record<string, any> = {}) {
         try {
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 90000); // 90 segundos
+
             const response = await fetch(`${BROWSERLESS_ENDPOINT}?token=${this.token}`, {
                 method: 'POST',
                 headers: {
@@ -22,8 +25,11 @@ export class BrowserlessUtil {
                 body: JSON.stringify({
                     query,
                     variables
-                })
+                }),
+                signal: controller.signal
             });
+
+            clearTimeout(timeout);
 
             if (!response.ok) {
                 const errorText = await response.text();
@@ -40,6 +46,9 @@ export class BrowserlessUtil {
             return result.data;
 
         } catch (error: any) {
+            if (error.name === 'AbortError') {
+                throw new Error('Request timeout: La operación tardó más de 90 segundos');
+            }
             console.error('Error ejecutando query:', error.message);
             throw error;
         }
@@ -166,7 +175,7 @@ export class BrowserlessUtil {
                     time
                 }
                 
-                waitAfterLogin: waitForTimeout(time: 5000) {
+                waitAfterLogin: waitForTimeout(time: 3000) {
                     time
                 }
                 
@@ -174,7 +183,7 @@ export class BrowserlessUtil {
                     time
                 }
                 
-                waitAfterClick1: waitForTimeout(time: 3000) {
+                waitAfterClick1: waitForTimeout(time: 1500) {
                     time
                 }
                 
@@ -212,20 +221,32 @@ export class BrowserlessUtil {
                     value
                 }
                 
-                waitAfterExpand: waitForTimeout(time: 2000) {
+                waitAfterExpand: waitForTimeout(time: 1000) {
                     time
                 }
                 
-                profileHtml: html(selector: "#profile") {
-                    html
+                razonSocial: text(selector: "#nameCntr") {
+                    text
+                }
+                
+                rutContribuyente: text(selector: "#rutCntr") {
+                    text
+                }
+                
+                domicilio: text(selector: "#domiCntr") {
+                    text
+                }
+                
+                correo: text(selector: "#mailCntr") {
+                    text
+                }
+                
+                regimenTributario: text(selector: "#box_user_info .icon_user_info") {
+                    text
                 }
                 
                 boxRightHtml: html(selector: "#box_right") {
                     html
-                }
-                
-                screenshot(type: jpeg) {
-                    base64
                 }
             }
         `;
@@ -249,9 +270,14 @@ export class BrowserlessUtil {
             clickDatosPersonalesTime: data.clickDatosPersonales.time,
             accordionsExpanded: accordionResult.expanded,
             totalAccordions: accordionResult.totalAccordions,
-            profileHtml: data.profileHtml.html,
+            datosBasicos: {
+                razonSocial: data.razonSocial?.text || '',
+                rut: data.rutContribuyente?.text || '',
+                domicilio: data.domicilio?.text || '',
+                correoElectronico: data.correo?.text || '',
+                regimenTributario: data.regimenTributario?.text || '',
+            },
             boxRightHtml: data.boxRightHtml.html,
-            screenshot: data.screenshot?.base64
         };
     }
 }

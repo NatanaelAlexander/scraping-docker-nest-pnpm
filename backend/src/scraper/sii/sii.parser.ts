@@ -1,75 +1,9 @@
 import {
-    DatosBasicosSII,
     DatosPersonalesCompletos,
     SeccionSII,
 } from './sii.types';
 
 export class SiiParser {
-    static extraerDatosBasicos(html: string): DatosBasicosSII | null {
-        const cheerio = require('cheerio');
-        const $ = cheerio.load(html);
-        
-        const datos: Partial<DatosBasicosSII> = {};
-
-        const razonSocial = $('#nameCntr').text().trim();
-        if (razonSocial) {
-            datos.razonSocial = razonSocial;
-        }
-
-        const rut = $('#rutCntr').text().trim();
-        if (rut) {
-            datos.rut = rut;
-        }
-
-        const domicilio = $('#domiCntr').text().trim();
-        if (domicilio) {
-            datos.domicilio = domicilio;
-        }
-
-        const correoElectronico = $('#mailCntr').text().trim();
-        if (correoElectronico && correoElectronico !== 'No registra información') {
-            datos.correoElectronico = correoElectronico;
-        } else {
-            datos.correoElectronico = 'No registra información';
-        }
-
-        let regimenTributario = '';
-        
-        $('#tablaAtributos tr').each((i, row) => {
-            const $row = $(row);
-            const descripcion = $row.find('td').first().text().trim().toLowerCase();
-            if (descripcion.includes('regimen')) {
-                regimenTributario = $row.find('td').first().text().trim();
-                return false;
-            }
-        });
-
-        if (!regimenTributario) {
-            const textoCompleto = $('body').text();
-            const regimenMatch = textoCompleto.match(/REGIMEN\s+([^(]+)\s*\(([^)]+)\)/i);
-            if (regimenMatch) {
-                regimenTributario = `${regimenMatch[1].trim()} (${regimenMatch[2].trim()})`;
-            } else {
-                const regimenMatch2 = textoCompleto.match(/REGIMEN\s+(.*?)(?:\n|$)/i);
-                if (regimenMatch2) {
-                    regimenTributario = regimenMatch2[1].trim();
-                }
-            }
-        }
-        
-        if (regimenTributario) {
-            datos.regimenTributario = regimenTributario;
-        } else {
-            datos.regimenTributario = 'No registra información';
-        }
-
-        if (!datos.rut) {
-            return null;
-        }
-        
-        return datos as DatosBasicosSII;
-    }
-
     static extraerDatosPersonales(html: string): DatosPersonalesCompletos {
         const cheerio = require('cheerio');
         const $ = cheerio.load(html);

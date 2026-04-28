@@ -46,7 +46,14 @@ export class SiiScraper {
                 passwordToUse
             );
 
-            const datosBasicos = SiiParser.extraerDatosBasicos(result.profileHtml || '');
+            const datosBasicos: DatosBasicosSII = {
+                rut: result.datosBasicos.rut,
+                razonSocial: result.datosBasicos.razonSocial,
+                domicilio: result.datosBasicos.domicilio,
+                correoElectronico: result.datosBasicos.correoElectronico || 'No registra información',
+                regimenTributario: result.datosBasicos.regimenTributario || 'No registra información',
+            };
+
             const datosExtraidos = SiiParser.extraerDatosPersonales(result.boxRightHtml || '');
 
             return {
