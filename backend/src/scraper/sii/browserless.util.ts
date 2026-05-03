@@ -5,6 +5,10 @@
 
 const BROWSERLESS_ENDPOINT = 'https://production-sfo.browserless.io/chromium/bql';
 
+/** Mensaje unificado ante credenciales inválidas o sesión que no llegó al portal esperado */
+export const SII_LOGIN_FALLIDO_MSJ =
+    'No fue posible iniciar sesión en el SII con los datos proporcionados, favor de revisar datos ingresados.';
+
 export class BrowserlessUtil {
     private readonly token: string;
 
@@ -178,6 +182,29 @@ export class BrowserlessUtil {
                 waitAfterLogin: waitForTimeout(time: 3000) {
                     time
                 }
+
+                loginVerificar: evaluate(content: """
+                (() => {
+                    try {
+                        const nombre = (document.querySelector('#nameCntr')?.textContent || '').trim();
+                        const menuDatos = document.querySelector('#menu_datos_contribuyente');
+                        if (nombre.length > 0 && menuDatos) return JSON.stringify({ ok: true });
+
+                        const rutInput = document.querySelector('#rutcntr');
+                        const passInput = document.querySelector('#clave');
+                        const formularioLogin = !!(rutInput && passInput);
+                        if (formularioLogin && nombre.length === 0) return JSON.stringify({ ok: false });
+
+                        if (nombre.length > 0) return JSON.stringify({ ok: true });
+
+                        return JSON.stringify({ ok: false });
+                    } catch (_) {
+                        return JSON.stringify({ ok: false });
+                    }
+                })()
+                """) {
+                    value
+                }
                 
                 clickDatosPersonales: click(selector: "#menu_datos_contribuyente") {
                     time
@@ -258,6 +285,16 @@ export class BrowserlessUtil {
         };
 
         const data = await this.executeQuery(query, variables);
+
+        let loginOk = false;
+        try {
+            loginOk = JSON.parse(data.loginVerificar?.value || '{}').ok === true;
+        } catch {
+            loginOk = false;
+        }
+        if (!loginOk) {
+            throw new Error(SII_LOGIN_FALLIDO_MSJ);
+        }
 
         let accordionResult = { totalAccordions: 0, expanded: 0, error: null };
         try {

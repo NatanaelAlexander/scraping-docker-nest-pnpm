@@ -1,10 +1,26 @@
 import {
+    DatosBasicosSII,
+    DatosBasicosSIIRaw,
     DatosPersonalesCompletos,
     SeccionSII,
 } from './sii.types';
 
 export class SiiParser {
-    static extraerDatosPersonales(html: string): DatosPersonalesCompletos {
+    static parseDatosBasicos(raw: DatosBasicosSIIRaw): DatosBasicosSII {
+        return {
+            rut: raw.rut ?? '',
+            razonSocial: raw.razonSocial ?? '',
+            domicilio: raw.domicilio ?? '',
+            correoElectronico: raw.correoElectronico?.trim()
+                ? raw.correoElectronico
+                : 'No registra información',
+            regimenTributario: raw.regimenTributario?.trim()
+                ? raw.regimenTributario
+                : 'No registra información',
+        };
+    }
+
+    static parseDatosPersonalesDesdeHtml(html: string): DatosPersonalesCompletos {
         const cheerio = require('cheerio');
         const $ = cheerio.load(html);
 

@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import * as cheerio from 'cheerio';
-import { BrowserlessUtil } from './browserless.util';
-import { SiiParser } from './sii.parser';
-import { DatosBasicosSII, DatosPersonalesCompletos } from './sii.types';
+import { BrowserlessUtil, SII_LOGIN_FALLIDO_MSJ } from './browserless.util';
+import type { SesionDatosContribuyenteCruda } from './sii.types';
+
+export type ObtenerSesionContribuyenteResultado =
+    | ({ success: true } & SesionDatosContribuyenteCruda)
+    | { success: false; error: string; stack?: string };
 
 @Injectable()
 export class SiiScraper {
@@ -13,7 +15,6 @@ export class SiiScraper {
 
     constructor() {
         this.RUT = process.env.RUT_TRIBUTARIO?.replace('-', '').slice(0, -1) || '';
-        const rutCompleto = process.env.RUT_TRIBUTARIO || '';
         this.PASSWORD = process.env.PASS_TRIBUTARIO || '';
         this.BROWSERLESS_TOKEN = process.env.TOKEN_BROWSLESS || '';
 
@@ -28,7 +29,11 @@ export class SiiScraper {
         this.browserless = new BrowserlessUtil(this.BROWSERLESS_TOKEN);
     }
 
-    async obtenerDatosPersonalesCompletos(rut?: string, password?: string) {
+    /** Solo I/O Browserless (login + HTML / textos sin transformar doménio). El parseo va en `SiiParser`. */
+    async obtenerSesionDatosDelContribuyente(
+        rut?: string,
+        password?: string,
+    ): Promise<ObtenerSesionContribuyenteResultado> {
         try {
             if (!this.BROWSERLESS_TOKEN) {
                 throw new Error('TOKEN_BROWSLESS no está configurado');
@@ -41,33 +46,21 @@ export class SiiScraper {
                 throw new Error('RUT y contraseña son requeridos');
             }
 
-            const result = await this.browserless.obtenerDatosPersonales(
-                rutToUse,
-                passwordToUse
-            );
-
-            const datosBasicos: DatosBasicosSII = {
-                rut: result.datosBasicos.rut,
-                razonSocial: result.datosBasicos.razonSocial,
-                domicilio: result.datosBasicos.domicilio,
-                correoElectronico: result.datosBasicos.correoElectronico || 'No registra información',
-                regimenTributario: result.datosBasicos.regimenTributario || 'No registra información',
-            };
-
-            const datosExtraidos = SiiParser.extraerDatosPersonales(result.boxRightHtml || '');
-
+            const result = await this.browserless.obtenerDatosPersonales(rutToUse, passwordToUse);
             return {
                 success: true,
-                datosBasicos,
-                datosExtraidos,
+                datosBasicos: result.datosBasicos,
+                boxRightHtml: result.boxRightHtml || '',
             };
-
         } catch (error: any) {
-            console.error('Error obteniendo datos personales:', error.message);
-
+            const message = error?.message ?? String(error);
+            console.error('Error en sesión datos contribuyente SII (Browserless):', message);
+            if (message === SII_LOGIN_FALLIDO_MSJ) {
+                return { success: false, error: message };
+            }
             return {
                 success: false,
-                error: error.message,
+                error: message,
                 stack: error.stack,
             };
         }

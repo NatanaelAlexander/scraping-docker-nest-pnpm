@@ -1,3 +1,18 @@
+/** Campos tal como llegan desde Browserless (textos en página). */
+export interface DatosBasicosSIIRaw {
+    rut?: string;
+    razonSocial?: string;
+    domicilio?: string;
+    correoElectronico?: string;
+    regimenTributario?: string;
+}
+
+/** Salida sin parsear del scrape Mi SII (login + página datos contribuyente). */
+export interface SesionDatosContribuyenteCruda {
+    datosBasicos: DatosBasicosSIIRaw;
+    boxRightHtml: string;
+}
+
 export interface DatosBasicosSII {
     rut: string;
     razonSocial: string;
