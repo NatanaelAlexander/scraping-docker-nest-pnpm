@@ -1,4 +1,4 @@
-/** Campos tal como llegan desde Browserless (textos en página). */
+/** Campos tal como llegan desde Chromium (textos en página). */
 export interface DatosBasicosSIIRaw {
     rut?: string;
     razonSocial?: string;

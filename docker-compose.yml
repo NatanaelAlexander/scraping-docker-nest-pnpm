@@ -1,15 +1,17 @@
 services:
   api:
     build: ./backend
+    init: true
     ports:
       - "3000:3000"
     volumes:
       - ./backend:/app
       - /app/node_modules
-    command: pnpm run start:dev
+    command: sh -c "echo [startup] Validando Chromium... && chromium-browser --version && pnpm run start:dev"
     environment:
       - CHOKIDAR_USEPOLLING=true
       # Variables de entorno para el scraper SII
       - RUT_TRIBUTARIO=${RUT_TRIBUTARIO}
       - PASS_TRIBUTARIO=${PASS_TRIBUTARIO}
-      - TOKEN_BROWSLESS=${TOKEN_BROWSLESS}
+      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+      - PUPPETEER_PROTOCOL_TIMEOUT_MS=90000

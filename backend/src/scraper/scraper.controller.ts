@@ -15,6 +15,16 @@ export class ScraperController {
     @ApiOperation({ summary: 'Obtener categorías de libros' })
     getBooksCategories() { return this.scraperService.getBooksCategories(); }
 
+    @Get('sii/health/chromium')
+    @ApiOperation({
+        summary: 'Health check de Chromium/Puppeteer',
+        description:
+            'Verifica si Puppeteer puede abrir y cerrar Chromium correctamente. Devuelve configuración usada y estado del check.',
+    })
+    verificarChromium() {
+        return this.scraperService.verificarChromium();
+    }
+
     @Get('sii/datos-basicos')
     @ApiOperation({
         summary: 'Obtener datos básicos del contribuyente (SII)',
@@ -41,7 +51,7 @@ export class ScraperController {
     @ApiOperation({
         summary: 'Datos del contribuyente (básicos + tablas personales/tributarias)',
         description:
-            'Orquestación: llama al servicio de datos básicos y al de datos personales (tablas #box_right) y arma la respuesta unificada. Son dos ejecuciones Browserless independientes.',
+            'Hace una sola sesión en Chromium para obtener datos crudos y luego aplica parseo separado para datos básicos y datos personales tributarios.',
     })
     @ApiQuery({
         name: 'rut',
@@ -59,22 +69,6 @@ export class ScraperController {
         @Query('rut') rut?: string,
         @Query('password') password?: string,
     ) {
-        const datosBasicosRes = await this.scraperService.obtenerDatosBasicos(rut, password);
-        if (!datosBasicosRes.success) {
-            return datosBasicosRes;
-        }
-        const datosExtraidosRes = await this.scraperService.obtenerDatosPersonalesExtraidos(
-            rut,
-            password,
-        );
-        if (!datosExtraidosRes.success) {
-            return datosExtraidosRes;
-        }
-        return {
-            success: true,
-            datosBasicos: datosBasicosRes.datosBasicos,
-            datos_personales_tributarios:
-                datosExtraidosRes.datosExtraidos.datosPersonales,
-        };
+        return this.scraperService.obtenerDatosPersonalesCompletos(rut, password);
     }
 }

@@ -6,15 +6,14 @@ Proyecto de prueba para hacer scraping del portal SII (Servicio de Impuestos Int
 - Node.js (LTS)
 - PNPM
 - Docker
-- Browserless.io (para navegación headless con evasión de detección de bots)
+- Chromium local en el contenedor API (navegación headless)
 
 > Proyecto solo para pruebas y aprendizaje, no pensado para producción.
 
 ## 📋 Requisitos Previos
 
 1. **Docker y Docker Compose** instalados en tu sistema
-2. **Token de Browserless.io** (gratuito) - Obtén uno en [https://docs.browserless.io/](https://docs.browserless.io/)
-3. **Credenciales del SII** (RUT y contraseña)
+2. **Credenciales del SII** (RUT y contraseña)
 
 ## ⚙️ Configuración
 
@@ -34,15 +33,10 @@ Abre el archivo `.env` y configura tus credenciales:
 # Credenciales del SII
 RUT_TRIBUTARIO=12345678-9
 PASS_TRIBUTARIO=tu_contraseña_aquí
-
-# Token de Browserless (obtén uno gratis en https://www.browserless.io/)
-TOKEN_BROWSLESS=tu_token_aquí
 ```
 
 **Importante:**
 - El RUT debe estar en formato `12345678-9` (con guión)
-- El token de Browserless es **OBLIGATORIO** para que funcione el scraper
-- Puedes obtener un token gratuito registrándote en [Browserless.io](https://www.browserless.io/)
 
 ## 🚀 Levantar el proyecto
 
@@ -62,6 +56,27 @@ docker compose down
 - **Documentación Swagger:** [http://localhost:3000/docs](http://localhost:3000/docs)
 
 ## 🔍 Uso del Scraper SII
+
+### Health check de Chromium/Puppeteer
+
+Para validar en runtime que Chromium está operativo:
+
+```
+GET http://localhost:3000/scraper/sii/health/chromium
+```
+
+Respuesta esperada (ok):
+
+```json
+{
+  "success": true,
+  "chromium": {
+    "ok": true,
+    "executablePath": "/usr/bin/chromium-browser",
+    "timeoutMs": 90000
+  }
+}
+```
 
 ### Opción 1: Usar las credenciales del `.env`
 
@@ -86,8 +101,6 @@ GET http://localhost:3000/scraper/sii/datos-personales?rut=12345678-9&password=M
 3. Ingresa el RUT y la contraseña del SII (opcional si ya están en el `.env`)
 4. Haz click en "Execute"
 
-**Nota:** El token de Browserless **siempre** se debe configurar en el archivo `.env`, no se puede pasar como parámetro por seguridad.
-
 ## 📊 Datos Extraídos
 
 El scraper extrae la siguiente información del portal Mi SII:
@@ -109,14 +122,14 @@ El scraper extrae la siguiente información del portal Mi SII:
 ## 🛠️ Tecnologías Utilizadas
 
 - **NestJS** - Framework backend
-- **Browserless.io** - Servicio headless browser con evasión de detección de bots
+- **Puppeteer + Chromium local** - Navegador headless para automatización
 - **Cheerio** - Parser HTML para extracción de datos
 - **Docker** - Contenedorización
 - **Swagger** - Documentación de API
 
 ## 📝 Descripción
 
-Este proyecto se usa únicamente para practicar scraping dentro de un backend con NestJS usando Docker. Implementa un scraper real del portal SII de Chile utilizando Browserless.io para simular un navegador real y evitar la detección de bots.
+Este proyecto se usa únicamente para practicar scraping dentro de un backend con NestJS usando Docker. Implementa un scraper real del portal SII de Chile utilizando Puppeteer con Chromium local para simular un navegador real.
 
 ## ⚠️ Aviso Legal
 
